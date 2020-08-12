@@ -146,34 +146,31 @@ public class JTAServlet extends HttpServlet
 }
 ```
 
-The example source code has been annotated to display the key steps as
-follows:
+The key steps in the example source code are as follows:
 
--   The `UserTransactio`n and `DataSource` interfaces are
-    injected as instance variables to avoid a JNDI lookup of these
+
+-   The `UserTransaction` and `DataSource` interfaces are
+    injected as instance variables using the `@Resource` annotation to avoid a JNDI lookup of these
     resources on every request. This works because the transaction
     context is scoped to the current thread and not the UserTransaction
     object; so it can be safely used as an instance variable across
     multiple requests and separate methods.
--   When a JTA transaction is started, the Liberty transaction
-    manager creates an XA transaction, which is defined by a unique XID,
-    at the same time CICS creates a new UOW, which is mapped to the XA
+-   The JTA transaction scope is started using the `UserTransaction` interface with the `transaction.begin()` method, this causes the Liberty transaction
+    manager to create an XA transaction, which is defined by a unique XID, at the same time CICS creates a new UOW, which is mapped to the XA
     transaction using a UOWLINK.
--   When a recoverable CICS resource such as a TSQ is updated
+-   When a recoverable CICS resource such as a TSQ is updated using the `tsq.writeString()` method, then
     then the updates will be coordinated using the subordinate CICS UOW.
--   When modifying an external XA capable resource (in this case
-    a remote database) the XID is passed to the resource manager of that
-    resource to identify the transaction occurring.
--   If the transaction should complete successfully, the Liberty
-    transaction manager drives a commit. In this example the transaction
-    manager must drive a two phase commit. The Liberty server sends a
-    'prepare to commit' to both CICS and the remote database. Both of
+-   When modifying an external XA capable resource (in this case an SQL call to a remote database using `stmt.executeUpdate()`
+    the XID is passed to the resource manager of that resource to identify the transaction.
+-   If the transaction should complete successfully, the Liberty transaction manager drives a commit. In this example the transaction
+    manager must drive a two-phase commit. The Liberty server sends a
+    'prepare to commit' flow to both CICS and the remote database. Both of
     these then return a response as to whether they are ready to commit
     back to Liberty. If both are ready, the Liberty server then tells
     them to commit and waits for both of them to acknowledge that they
     have committed before it counts the transaction as complete.
 -   If a Java exception is thrown then we catch the failure and
-    invoke the rollback method on the UserTransaction. This causes the
+    invoke the `rollback` method on the `UserTransaction`. This causes the
     Liberty transaction manager to back-out any changes made within the
     Java transaction. Liberty sends a rollback command to both CICS and
     the remote database, which will then undo all their changes and
@@ -181,7 +178,7 @@ follows:
     bad practice to catch the generic Exception type but we do it here
     for simplicity of the sample.
 
-Note: JDBC 4.1 allows the use of the try-with-resources syntax
+>**Note:** JDBC 4.1 allows the use of the try-with-resources syntax
 introduced in Java SE 7 on `Connection` and `Statement` and is supported
 in CICS TS V5.3 via using Java EE 7 via APAR
 [PI63877](https://www.ibm.com/support/pages/apar/PI63877).
