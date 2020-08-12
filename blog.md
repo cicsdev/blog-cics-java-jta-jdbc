@@ -20,8 +20,7 @@ For the example in this tutorial, the following minimum prerequisites
 apply:
 
 -   CICS TS V5.2
--   A configured Liberty JVM server, for instance see
-    [Starting a CICS Liberty JVM server in 4 easy steps](https://www.ibm.com/developerworks/community/blogs/cicsdev/entry/liberty_jvm_servers_a_quickstart_guide).
+-   A configured Liberty JVM server
 
 What is JTA?
 ------------
